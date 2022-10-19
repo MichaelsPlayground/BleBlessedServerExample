@@ -1,5 +1,8 @@
 package de.androidcrypto.bleblessedserverexample;
 
+import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT16;
+import static com.welie.blessed.BluetoothBytesParser.FORMAT_UINT8;
+
 import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothGattCharacteristic;
@@ -28,6 +31,7 @@ import com.welie.blessed.ReadResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteOrder;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
@@ -50,6 +54,9 @@ class BluetoothServer {
     public static final String BLUETOOTH_HANDLER_CONNECTION_EXTRA = "androidcrypto.bluetoothhandler.connection.extra";
     public static final String BLUETOOTH_HANDLER_CURRENT_TIME = "androidcrypto.bluetoothhandler.currenttime";
     public static final String BLUETOOTH_HANDLER_CURRENT_TIME_EXTRA = "androidcrypto.bluetoothhandler.currenttime.extra";
+    public static final String BLUETOOTH_HANDLER_HEART_BEAT_RATE = "androidcrypto.bluetoothhandler.heartbeatrate";
+    public static final String BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA = "androidcrypto.bluetoothhandler.heartbeatrate.extra";
+
 
     public static synchronized BluetoothServer getInstance(Context context) {
         mContext = context;
@@ -143,6 +150,16 @@ class BluetoothServer {
                 Date date = parser.getDateTime();
                 Intent intent = new Intent(BLUETOOTH_HANDLER_CURRENT_TIME);
                 intent.putExtra(BLUETOOTH_HANDLER_CURRENT_TIME_EXTRA, date.toString());
+                sendToMain(intent);
+            }
+            if (characteristic.getUuid().equals(HeartRateService.HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID)) {
+                BluetoothBytesParser parser = new BluetoothBytesParser(value);
+                int flags = parser.getIntValue(FORMAT_UINT8);
+                final int unit = flags & 0x01;
+                // Parse heart rate
+                int pulse = (unit == 0) ? parser.getIntValue(FORMAT_UINT8) : parser.getIntValue(FORMAT_UINT16);
+                Intent intent = new Intent(BLUETOOTH_HANDLER_HEART_BEAT_RATE);
+                intent.putExtra(BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA, String.valueOf(pulse));
                 sendToMain(intent);
             }
         }

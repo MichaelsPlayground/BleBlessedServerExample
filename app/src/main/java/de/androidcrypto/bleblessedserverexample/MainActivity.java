@@ -13,7 +13,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.WindowManager;
 import android.widget.TextView;
 
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
     /* Local UI */
     private TextView mLocalTimeView, serverLog;
     SwitchMaterial bluetoothEnabled, advertisingActive, deviceConnected;
-    com.google.android.material.textfield.TextInputEditText connectionLog, currentTime;
+    com.google.android.material.textfield.TextInputEditText connectionLog, currentTime, heartBeatRate;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int ACCESS_LOCATION_REQUEST = 2;
@@ -47,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
         deviceConnected = findViewById(R.id.swMainDeviceConnected);
         connectionLog = findViewById(R.id.etMainConnectionLog);
         currentTime = findViewById(R.id.etMainCurrentTime);
+        heartBeatRate = findViewById(R.id.etMainHeartBeatRate);
         mLocalTimeView = (TextView) findViewById(R.id.text_time);
         serverLog = findViewById(R.id.tvMainLog);
 
@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(advertiserStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_ADVERTISER)));
         registerReceiver(connectionStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_CONNECTION)));
         registerReceiver(currentTimeStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_CURRENT_TIME)));
+        registerReceiver(heartBeatRateStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_HEART_BEAT_RATE)));
     }
 
     @SuppressLint("MissingPermission")
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(advertiserStateReceiver);
         unregisterReceiver(connectionStateReceiver);
         unregisterReceiver(currentTimeStateReceiver);
+        unregisterReceiver(heartBeatRateStateReceiver);
     }
 
     private boolean isBluetoothEnabled() {
@@ -242,6 +244,15 @@ public class MainActivity extends AppCompatActivity {
             String currentTimeStatus = intent.getStringExtra(BluetoothServer.BLUETOOTH_HANDLER_CURRENT_TIME_EXTRA);
             if (currentTimeStatus == null) return;
             currentTime.setText(currentTimeStatus);
+        }
+    };
+
+    private final BroadcastReceiver heartBeatRateStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String heartBeatRateStatus = intent.getStringExtra(BluetoothServer.BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA);
+            if (heartBeatRateStatus == null) return;
+            heartBeatRate.setText(heartBeatRateStatus);
         }
     };
 }
