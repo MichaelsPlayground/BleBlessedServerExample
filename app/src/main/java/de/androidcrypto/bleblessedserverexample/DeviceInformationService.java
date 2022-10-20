@@ -1,6 +1,8 @@
 package de.androidcrypto.bleblessedserverexample;
 
 import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ;
+import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ_ENCRYPTED;
+import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ_ENCRYPTED_MITM;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
 
 import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_WRITE; // new
@@ -41,6 +43,12 @@ class DeviceInformationService extends BaseService {
         super(peripheralManager);
 
         BluetoothGattCharacteristic manufacturer = new BluetoothGattCharacteristic(MANUFACTURER_NAME_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ);
+
+        // this will ask for pairing /bonding with the same 6-digit pin
+        //BluetoothGattCharacteristic manufacturer = new BluetoothGattCharacteristic(MANUFACTURER_NAME_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ_ENCRYPTED_MITM);
+        // this will ask for pairing /bonding with the same 6-digit pin
+        //BluetoothGattCharacteristic manufacturer = new BluetoothGattCharacteristic(MANUFACTURER_NAME_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ_ENCRYPTED);
+
         service.addCharacteristic(manufacturer);
 
         // org: BluetoothGattCharacteristic modelNumber = new BluetoothGattCharacteristic(MODEL_NUMBER_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ);
