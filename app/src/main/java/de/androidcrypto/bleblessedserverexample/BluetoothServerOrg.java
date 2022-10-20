@@ -15,14 +15,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.welie.blessed.AdvertiseError;
 import com.welie.blessed.BluetoothBytesParser;
 import com.welie.blessed.BluetoothCentral;
-import com.welie.blessed.BluetoothPeripheral;
 import com.welie.blessed.BluetoothPeripheralManager;
 import com.welie.blessed.BluetoothPeripheralManagerCallback;
 import com.welie.blessed.GattStatus;
@@ -31,7 +29,6 @@ import com.welie.blessed.ReadResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteOrder;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
@@ -39,16 +36,12 @@ import java.util.UUID;
 
 import timber.log.Timber;
 
-/**
- * this BluetoothServer is changed to accept a writeCharacteristic on DeviceInformation /
- * Model Number String = MODEL_NUMBER_CHARACTERISTIC_UUID
- */
 
 @SuppressLint("MissingPermission")
-class BluetoothServer {
+class BluetoothServerOrg {
 
     private static Context mContext;
-    private static BluetoothServer instance = null;
+    private static BluetoothServerOrg instance = null;
     private BluetoothPeripheralManager peripheralManager;
     private final HashMap<BluetoothGattService, Service> serviceImplementations = new HashMap<>();
 
@@ -63,10 +56,10 @@ class BluetoothServer {
     public static final String BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA = "androidcrypto.bluetoothhandler.heartbeatrate.extra";
 
 
-    public static synchronized BluetoothServer getInstance(Context context) {
+    public static synchronized BluetoothServerOrg getInstance(Context context) {
         mContext = context;
         if (instance == null) {
-            instance = new BluetoothServer(context.getApplicationContext());
+            instance = new BluetoothServerOrg(context.getApplicationContext());
         }
         return instance;
     }
@@ -237,7 +230,7 @@ class BluetoothServer {
         }
     }
 
-    BluetoothServer(Context context) {
+    BluetoothServerOrg(Context context) {
         //Timber.plant(new Timber.DebugTree());
 
         final BluetoothManager bluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
