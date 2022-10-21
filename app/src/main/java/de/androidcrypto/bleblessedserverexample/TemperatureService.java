@@ -51,6 +51,7 @@ public class TemperatureService extends BaseService {
     //public static final UUID TEMPERATURE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A6E-0000-1000-8000-00805f9b34fb");
     // see: https://github.com/oesmith/gatt-xml/blob/master/org.bluetooth.characteristic.temperature.xml
 
+    // temperature in Fahrenheit only
     public static final UUID TEMPERATURE_FAHRENHEIT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A20-0000-1000-8000-00805f9b34fb");
 
     private @NotNull final BluetoothGattService service = new BluetoothGattService(ENVIRONMENTAL_SENSING_SERVICE_UUID, SERVICE_TYPE_PRIMARY);
@@ -112,7 +113,7 @@ public class TemperatureService extends BaseService {
             // step 05: provide the data in the correct sequence
 
             // temperature in Fahrenheit
-            // todo examime correct value, this is giving wrong value
+            // todo examine correct value, this is giving wrong value
             // this is for temperature in Fahrenheit (""00002A20-0000-1000-8000-00805f9b34fb"")
             BluetoothBytesParser parser = new BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN);
             parser.setFloatValue(celsiusToFahrenheit(currentTemperature), 2);
@@ -232,15 +233,20 @@ public class TemperatureService extends BaseService {
     }
 
     public float celsiusToFahrenheit (@NotNull float celsius) {
+        return ((celsius * 9) / 5) + 32;
+        /*
         celsius = celsius * 9;
         celsius = celsius / 5;
-        return (celsius + 32);
+        return (celsius + 32);*/
     }
 
     public float fahrenheitToCelsius (@NotNull float fahrenheit) {
+        return ((fahrenheit - 32) * 5) / 9;
+        /*
         fahrenheit = fahrenheit - 32;
         fahrenheit = fahrenheit / 9;
         return (fahrenheit * 5);
+         */
     }
 
 
