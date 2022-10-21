@@ -112,7 +112,7 @@ public class TemperatureService extends BaseService {
             // step 05: provide the data in the correct sequence
 
             // temperature in Fahrenheit
-
+            // todo examime correct value, this is giving wrong value
             // this is for temperature in Fahrenheit (""00002A20-0000-1000-8000-00805f9b34fb"")
             BluetoothBytesParser parser = new BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN);
             parser.setFloatValue(celsiusToFahrenheit(currentTemperature), 2);
@@ -167,6 +167,8 @@ public class TemperatureService extends BaseService {
         currentTemperature += (int) ((Math.random() * 10) - 5);
         if (currentTemperature > 40) currentTemperature = 40;
         // step 05: provide the data in the correct sequence
+
+        // todo check for UUIDs to provide different data
 
         // this is for temperature in Celsius or Fahrenheit ("00002A1C-0000-1000-8000-00805f9b34fb")
         byte flag = 0;
