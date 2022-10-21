@@ -75,7 +75,7 @@ class DeviceInformationService extends BaseService {
         if (characteristic.getUuid().equals(MANUFACTURER_NAME_CHARACTERISTIC_UUID)) {
             return new ReadResponse(GattStatus.SUCCESS, Build.MANUFACTURER.getBytes());
         } else if (characteristic.getUuid().equals(MODEL_NUMBER_CHARACTERISTIC_UUID)) {
-            // new for simulating write
+            // new for simulating write - here to a local variable
             if (newModel != null) {
                 return new ReadResponse(GattStatus.SUCCESS, newModel);
             } else {

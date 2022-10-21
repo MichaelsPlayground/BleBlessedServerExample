@@ -29,9 +29,8 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity {
 
     /* Local UI */
-    private TextView mLocalTimeView, serverLog;
     SwitchMaterial bluetoothEnabled, advertisingActive, deviceConnected;
-    com.google.android.material.textfield.TextInputEditText connectionLog, currentTime, heartBeatRate;
+    com.google.android.material.textfield.TextInputEditText connectionLog, currentTime, heartBeatRate, modelName;
 
     private static final int REQUEST_ENABLE_BT = 1;
     private static final int ACCESS_LOCATION_REQUEST = 2;
@@ -47,8 +46,7 @@ public class MainActivity extends AppCompatActivity {
         connectionLog = findViewById(R.id.etMainConnectionLog);
         currentTime = findViewById(R.id.etMainCurrentTime);
         heartBeatRate = findViewById(R.id.etMainHeartBeatRate);
-        mLocalTimeView = (TextView) findViewById(R.id.text_time);
-        serverLog = findViewById(R.id.tvMainLog);
+        modelName = findViewById(R.id.etMainModelName);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -56,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(connectionStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_CONNECTION)));
         registerReceiver(currentTimeStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_CURRENT_TIME)));
         registerReceiver(heartBeatRateStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_HEART_BEAT_RATE)));
+        registerReceiver(modelNameStateReceiver, new IntentFilter((BluetoothServer.BLUETOOTH_HANDLER_MODEL_NAME)));
     }
 
     @SuppressLint("MissingPermission")
@@ -80,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         unregisterReceiver(connectionStateReceiver);
         unregisterReceiver(currentTimeStateReceiver);
         unregisterReceiver(heartBeatRateStateReceiver);
+        unregisterReceiver(modelNameStateReceiver);
     }
 
     private boolean isBluetoothEnabled() {
@@ -253,6 +253,15 @@ public class MainActivity extends AppCompatActivity {
             String heartBeatRateStatus = intent.getStringExtra(BluetoothServer.BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA);
             if (heartBeatRateStatus == null) return;
             heartBeatRate.setText(heartBeatRateStatus);
+        }
+    };
+
+    private final BroadcastReceiver modelNameStateReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String dataStatus = intent.getStringExtra(BluetoothServer.BLUETOOTH_HANDLER_MODEL_NAME_EXTRA);
+            if (dataStatus == null) return;
+            modelName.setText(dataStatus);
         }
     };
 }

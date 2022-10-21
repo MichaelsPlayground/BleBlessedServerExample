@@ -1,6 +1,7 @@
 package de.androidcrypto.bleblessedserverexample;
 
 import static android.bluetooth.BluetoothGattCharacteristic.PERMISSION_READ;
+import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_INDICATE;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_NOTIFY;
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
 import static android.bluetooth.BluetoothGattService.SERVICE_TYPE_PRIMARY;
@@ -27,7 +28,9 @@ class HeartRateService extends BaseService {
     public static final UUID HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A37-0000-1000-8000-00805f9b34fb");
 
     private @NotNull final BluetoothGattService service = new BluetoothGattService(HEART_BEAT_RATE_SERVICE_UUID, SERVICE_TYPE_PRIMARY);
-    private @NotNull final BluetoothGattCharacteristic measurement = new BluetoothGattCharacteristic(HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_NOTIFY, PERMISSION_READ);
+    // uses indication private @NotNull final BluetoothGattCharacteristic measurement = new BluetoothGattCharacteristic(HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_NOTIFY, PERMISSION_READ);
+    // uses indicate
+    private @NotNull final BluetoothGattCharacteristic measurement = new BluetoothGattCharacteristic(HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_INDICATE, PERMISSION_READ);
     private @NotNull final Handler handler = new Handler(Looper.getMainLooper());
     private @NotNull final Runnable notifyRunnable = this::notifyHeartRate;
     private int currentHR = 80;

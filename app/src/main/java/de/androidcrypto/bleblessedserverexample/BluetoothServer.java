@@ -15,14 +15,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.ParcelUuid;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import com.welie.blessed.AdvertiseError;
 import com.welie.blessed.BluetoothBytesParser;
 import com.welie.blessed.BluetoothCentral;
-import com.welie.blessed.BluetoothPeripheral;
 import com.welie.blessed.BluetoothPeripheralManager;
 import com.welie.blessed.BluetoothPeripheralManagerCallback;
 import com.welie.blessed.GattStatus;
@@ -31,7 +29,7 @@ import com.welie.blessed.ReadResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteOrder;
-import java.util.Arrays;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Objects;
@@ -61,7 +59,8 @@ class BluetoothServer {
     public static final String BLUETOOTH_HANDLER_CURRENT_TIME_EXTRA = "androidcrypto.bluetoothhandler.currenttime.extra";
     public static final String BLUETOOTH_HANDLER_HEART_BEAT_RATE = "androidcrypto.bluetoothhandler.heartbeatrate";
     public static final String BLUETOOTH_HANDLER_HEART_BEAT_RATE_EXTRA = "androidcrypto.bluetoothhandler.heartbeatrate.extra";
-
+    public static final String BLUETOOTH_HANDLER_MODEL_NAME = "androidcrypto.bluetoothhandler.modelname";
+    public static final String BLUETOOTH_HANDLER_MODEL_NAME_EXTRA = "androidcrypto.bluetoothhandler.modelname.extra";
 
     public static synchronized BluetoothServer getInstance(Context context) {
         mContext = context;
@@ -86,11 +85,18 @@ class BluetoothServer {
             return super.onCharacteristicRead(central, characteristic);
         }
 
-
         @Override
         public @NotNull GattStatus onCharacteristicWrite(@NotNull BluetoothCentral central, @NotNull BluetoothGattCharacteristic characteristic, @NotNull byte[] value) {
             Service serviceImplementation = serviceImplementations.get(characteristic.getService());
             if (serviceImplementation != null) {
+                System.out.println("* onCharWrite modelName: " + new String(value));
+                // new - when the model name characteristic is read the model name is shown on th UI
+                if (characteristic.getUuid().equals(DeviceInformationService.MODEL_NUMBER_CHARACTERISTIC_UUID)) {
+                    String data = new String(value);
+                    Intent intent = new Intent(BLUETOOTH_HANDLER_MODEL_NAME);
+                    intent.putExtra(BLUETOOTH_HANDLER_MODEL_NAME_EXTRA, data);
+                    sendToMain(intent);
+                }
                 return serviceImplementation.onCharacteristicWrite(central, characteristic, value);
             }
             return GattStatus.REQUEST_NOT_SUPPORTED;
