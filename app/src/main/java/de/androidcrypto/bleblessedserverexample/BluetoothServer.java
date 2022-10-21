@@ -73,7 +73,6 @@ class BluetoothServer {
     private final BluetoothPeripheralManagerCallback peripheralManagerCallback = new BluetoothPeripheralManagerCallback() {
         @Override
         public void onServiceAdded(@NotNull GattStatus status, @NotNull BluetoothGattService service) {
-
         }
 
         @Override
@@ -270,9 +269,14 @@ class BluetoothServer {
         serviceImplementations.put(dis.getService(), dis);
         serviceImplementations.put(cts.getService(), cts);
         serviceImplementations.put(hrs.getService(), hrs);
+        // new in step 03
+        TemperatureService temperatureService = new TemperatureService(peripheralManager);
+        serviceImplementations.put(temperatureService.getService(), temperatureService);
 
         setupServices();
         startAdvertising(hrs.getService().getUuid());
+        // new in step 03
+        startAdvertising(temperatureService.getService().getUuid());
     }
 
     /**
