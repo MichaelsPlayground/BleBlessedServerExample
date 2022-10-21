@@ -51,10 +51,13 @@ public class TemperatureService extends BaseService {
     //public static final UUID TEMPERATURE_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A6E-0000-1000-8000-00805f9b34fb");
     // see: https://github.com/oesmith/gatt-xml/blob/master/org.bluetooth.characteristic.temperature.xml
 
+    public static final UUID TEMPERATURE_FAHRENHEIT_MEASUREMENT_CHARACTERISTIC_UUID = UUID.fromString("00002A20-0000-1000-8000-00805f9b34fb");
+
     private @NotNull final BluetoothGattService service = new BluetoothGattService(ENVIRONMENTAL_SENSING_SERVICE_UUID, SERVICE_TYPE_PRIMARY);
     // uses indication private @NotNull final BluetoothGattCharacteristic measurement = new BluetoothGattCharacteristic(HEART_BEAT_RATE_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_NOTIFY, PERMISSION_READ);
     // uses indicate
     private @NotNull final BluetoothGattCharacteristic measurement = new BluetoothGattCharacteristic(TEMPERATURE_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_INDICATE, PERMISSION_READ);
+    private @NotNull final BluetoothGattCharacteristic measurementFahrenheit = new BluetoothGattCharacteristic(TEMPERATURE_FAHRENHEIT_MEASUREMENT_CHARACTERISTIC_UUID, PROPERTY_READ | PROPERTY_INDICATE, PERMISSION_READ);
     private @NotNull final Handler handler = new Handler(Looper.getMainLooper());
     private @NotNull final Runnable notifyRunnable = this::notifyTemperature;
     private int currentTemperature = 22;
@@ -63,6 +66,11 @@ public class TemperatureService extends BaseService {
         super(peripheralManager);
         service.addCharacteristic(measurement);
         measurement.addDescriptor(getCccDescriptor());
+
+        // to provide Fahrenheit values directly
+        service.addCharacteristic(measurementFahrenheit);
+        measurementFahrenheit.addDescriptor(getCccDescriptor());
+
     }
 
     @Override
@@ -81,15 +89,55 @@ public class TemperatureService extends BaseService {
             byte flag = 0;
             // bit 0 = Temperature Units Flag, 0 = Celsius, 1 = Fahrenheit
             // for Celsius no bitSetting
-            // flag = setBitInByte(flag, 0); // set fahrenheit
+            flag = setBitInByte(flag, 0); // set fahrenheit
             // bit 1 = Time Stamp Flag, 0 = no TimeStamp, 1 = TimeStamp present
             // for noTimeStamp no bitSetting
             // bit 2 = Temperature Type Flag, 0 = Temperature type not present, 1 = Temperature type present
             // for no Temperature type present no bitSetting
             // flag = setBitInByte(flag, 0);
             // following Temperature value (in Celsius or Fahrenheit) is FLOAT
-            byte[] returnByte = getTemperatureValue(flag);
+
+            // as we want Fahrenheit we need to converse the data
+            float temperature = celsiusToFahrenheit(currentTemperature);
+            byte[] returnByte = getTemperatureValue(flag, temperature);
             return new ReadResponse(GattStatus.SUCCESS, returnByte);
+
+            /*
+            // this is for temperature in Celsius ("00002A6E-0000-1000-8000-00805f9b34fb")
+            BluetoothBytesParser parser = new BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN);
+            parser.setFloatValue(currentTemperature, 2);
+            return new ReadResponse(GattStatus.SUCCESS, parser.getValue());
+             */
+        } else if (characteristic.getUuid().equals(TEMPERATURE_FAHRENHEIT_MEASUREMENT_CHARACTERISTIC_UUID)) {
+            // step 05: provide the data in the correct sequence
+
+            // temperature in Fahrenheit
+
+            // this is for temperature in Fahrenheit (""00002A20-0000-1000-8000-00805f9b34fb"")
+            BluetoothBytesParser parser = new BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN);
+            parser.setFloatValue(celsiusToFahrenheit(currentTemperature), 2);
+            return new ReadResponse(GattStatus.SUCCESS, parser.getValue());
+
+            /*
+            // this is for temperature in Celsius or Fahrenheit ("00002A1C-0000-1000-8000-00805f9b34fb")
+            byte flag = 0;
+            // bit 0 = Temperature Units Flag, 0 = Celsius, 1 = Fahrenheit
+            // for Celsius no bitSetting
+            flag = setBitInByte(flag, 0); // set fahrenheit
+            // bit 1 = Time Stamp Flag, 0 = no TimeStamp, 1 = TimeStamp present
+            // for noTimeStamp no bitSetting
+            // bit 2 = Temperature Type Flag, 0 = Temperature type not present, 1 = Temperature type present
+            // for no Temperature type present no bitSetting
+            // flag = setBitInByte(flag, 0);
+            // following Temperature value (in Celsius or Fahrenheit) is FLOAT
+
+            // as we want Fahrenheit we need to converse the data
+            float temperature = celsiusToFahrenheit(currentTemperature);
+
+            byte[] returnByte = getTemperatureValue(flag, temperature);
+
+            return new ReadResponse(GattStatus.SUCCESS, returnByte);
+            */
 
             /*
             // this is for temperature in Celsius ("00002A6E-0000-1000-8000-00805f9b34fb")
@@ -124,14 +172,18 @@ public class TemperatureService extends BaseService {
         byte flag = 0;
         // bit 0 = Temperature Units Flag, 0 = Celsius, 1 = Fahrenheit
         // for Celsius no bitSetting
-        // flag = setBitInByte(flag, 0); // set fahrenheit
+        flag = setBitInByte(flag, 0); // set fahrenheit
         // bit 1 = Time Stamp Flag, 0 = no TimeStamp, 1 = TimeStamp present
         // for noTimeStamp no bitSetting
         // bit 2 = Temperature Type Flag, 0 = Temperature type not present, 1 = Temperature type present
         // for no Temperature type present no bitSetting
         // flag = setBitInByte(flag, 0);
         // following Temperature value (in Celsius or Fahrenheit) is FLOAT
-        byte[] returnByte = getTemperatureValue(flag);
+
+        // as we want Fahrenheit we need to converse the data
+        float temperature = celsiusToFahrenheit(currentTemperature);
+
+        byte[] returnByte = getTemperatureValue(flag, temperature);
         notifyCharacteristicChanged(returnByte, measurement);
 
         /*
@@ -161,14 +213,14 @@ public class TemperatureService extends BaseService {
     }
 
     /**
-     * utilities for manipulating the flag byte
+     * utilities for manipulating the data
      */
 
-    private byte[] getTemperatureValue(byte flag) {
+    private byte[] getTemperatureValue(byte flag, float temperature) {
         byte[] flagByte = new byte[1];
         flagByte[0] = flag;
         BluetoothBytesParser parser = new BluetoothBytesParser(ByteOrder.LITTLE_ENDIAN);
-        parser.setFloatValue(currentTemperature, 2);
+        parser.setFloatValue(temperature, 2);
         byte[] floatValueByte = parser.getValue();
         int floatValueByteLength = floatValueByte.length;
         byte[] returnByte = new byte[1 + floatValueByteLength]; // 1 byte for flag, xx bytes for floatValue
@@ -176,6 +228,19 @@ public class TemperatureService extends BaseService {
         System.arraycopy(floatValueByte, 0, returnByte, 1, floatValueByteLength);
         return returnByte;
     }
+
+    public float celsiusToFahrenheit (@NotNull float celsius) {
+        celsius = celsius * 9;
+        celsius = celsius / 5;
+        return (celsius + 32);
+    }
+
+    public float fahrenheitToCelsius (@NotNull float fahrenheit) {
+        fahrenheit = fahrenheit - 32;
+        fahrenheit = fahrenheit / 9;
+        return (fahrenheit * 5);
+    }
+
 
 // position is 0 based starting from right to left
     public static byte setBitInByte(byte input, int pos) {
