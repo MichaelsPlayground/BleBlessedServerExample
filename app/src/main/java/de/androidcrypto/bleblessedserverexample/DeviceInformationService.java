@@ -44,6 +44,8 @@ class DeviceInformationService extends BaseService {
 
         BluetoothGattCharacteristic manufacturer = new BluetoothGattCharacteristic(MANUFACTURER_NAME_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ);
 
+        // see here: https://medium.com/rtone-iot-security/deep-dive-into-bluetooth-le-security-d2301d640bfc
+
         // this will ask for pairing /bonding with the same 6-digit pin
         //BluetoothGattCharacteristic manufacturer = new BluetoothGattCharacteristic(MANUFACTURER_NAME_CHARACTERISTIC_UUID, PROPERTY_READ, PERMISSION_READ_ENCRYPTED_MITM);
         // this will ask for pairing /bonding with the same 6-digit pin
