@@ -16,3 +16,6 @@ https://github.com/weliem/blessed-android/blob/master/SERVER.md
 A BLE Glucose device is available here: 
 https://www.diabetes.ascensia.de/produkte/contour-next-mg/
 
+Another BLE library could be https://github.com/NordicSemiconductor/Android-BLE-Library
+
+https://github.com/NordicSemiconductor/Android-nRF-Blinky

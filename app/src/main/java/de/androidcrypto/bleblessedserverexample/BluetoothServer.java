@@ -73,7 +73,6 @@ class BluetoothServer {
     private final BluetoothPeripheralManagerCallback peripheralManagerCallback = new BluetoothPeripheralManagerCallback() {
         @Override
         public void onServiceAdded(@NotNull GattStatus status, @NotNull BluetoothGattService service) {
-
         }
 
         @Override
