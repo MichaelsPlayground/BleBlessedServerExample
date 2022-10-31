@@ -269,9 +269,14 @@ class BluetoothServer {
         serviceImplementations.put(dis.getService(), dis);
         serviceImplementations.put(cts.getService(), cts);
         serviceImplementations.put(hrs.getService(), hrs);
+        // new in step 04
+        TemperatureService temperatureService = new TemperatureService(peripheralManager);
+        serviceImplementations.put(temperatureService.getService(), temperatureService);
 
         setupServices();
         startAdvertising(hrs.getService().getUuid());
+        // new in step 04
+        startAdvertising(temperatureService.getService().getUuid());
     }
 
     /**
